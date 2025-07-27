@@ -1,4 +1,4 @@
-import { sortByColumn } from '../app/lib/SortingUtils';
+import { sortByColumn, getTies } from '../app/lib/SortingUtils';
 import type { MedalsDataWithTotal } from '../app/types/medals';
 
 describe('SortingUtils', () => {
@@ -119,6 +119,163 @@ describe('SortingUtils', () => {
 
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getTies', () => {
+    const mockDataWithTies: MedalsDataWithTotal = [
+      {
+        code: 'USA',
+        gold: 9,
+        silver: 7,
+        bronze: 12,
+        total: 28
+      },
+      {
+        code: 'CHN',
+        gold: 9, // Tie with USA in gold
+        silver: 5,
+        bronze: 14,
+        total: 28 // Tie with USA in total
+      },
+      {
+        code: 'GER',
+        gold: 8,
+        silver: 7, // Tie with USA in silver
+        bronze: 13,
+        total: 28 // Tie with USA and CHN in total
+      },
+      {
+        code: 'FRA',
+        gold: 4,
+        silver: 4,
+        bronze: 7,
+        total: 15
+      },
+      {
+        code: 'ITA',
+        gold: 4, // Tie with FRA in gold
+        silver: 4, // Tie with FRA in silver
+        bronze: 7, // Tie with FRA in bronze
+        total: 15 // Tie with FRA in total
+      }
+    ];
+
+    it('should identify ties in total column correctly', () => {
+      const result = getTies(mockDataWithTies, 'total');
+
+      expect(result.size).toBe(2);
+      
+      // Check tie for total = 28 (USA, CHN, GER)
+      expect(result.has(28)).toBe(true);
+      const totalTie28 = result.get(28)!;
+      expect(totalTie28).toHaveLength(3);
+      expect(totalTie28.map(c => c.code)).toEqual(expect.arrayContaining(['USA', 'CHN', 'GER']));
+
+      // Check tie for total = 15 (FRA, ITA)
+      expect(result.has(15)).toBe(true);
+      const totalTie15 = result.get(15)!;
+      expect(totalTie15).toHaveLength(2);
+      expect(totalTie15.map(c => c.code)).toEqual(expect.arrayContaining(['FRA', 'ITA']));
+    });
+
+    it('should identify ties in gold column correctly', () => {
+      const result = getTies(mockDataWithTies, 'gold');
+
+      expect(result.size).toBe(2);
+      
+      // Check tie for gold = 9 (USA, CHN)
+      expect(result.has(9)).toBe(true);
+      const goldTie9 = result.get(9)!;
+      expect(goldTie9).toHaveLength(2);
+      expect(goldTie9.map(c => c.code)).toEqual(expect.arrayContaining(['USA', 'CHN']));
+
+      // Check tie for gold = 4 (FRA, ITA)
+      expect(result.has(4)).toBe(true);
+      const goldTie4 = result.get(4)!;
+      expect(goldTie4).toHaveLength(2);
+      expect(goldTie4.map(c => c.code)).toEqual(expect.arrayContaining(['FRA', 'ITA']));
+    });
+
+    it('should identify ties in silver column correctly', () => {
+      const result = getTies(mockDataWithTies, 'silver');
+
+      expect(result.size).toBe(2);
+      
+      // Check tie for silver = 7 (USA, GER)
+      expect(result.has(7)).toBe(true);
+      const silverTie7 = result.get(7)!;
+      expect(silverTie7).toHaveLength(2);
+      expect(silverTie7.map(c => c.code)).toEqual(expect.arrayContaining(['USA', 'GER']));
+
+      // Check tie for silver = 4 (FRA, ITA)
+      expect(result.has(4)).toBe(true);
+      const silverTie4 = result.get(4)!;
+      expect(silverTie4).toHaveLength(2);
+      expect(silverTie4.map(c => c.code)).toEqual(expect.arrayContaining(['FRA', 'ITA']));
+    });
+
+    it('should identify ties in bronze column correctly', () => {
+      const result = getTies(mockDataWithTies, 'bronze');
+
+      expect(result.size).toBe(1);
+      
+      // Check tie for bronze = 7 (FRA, ITA)
+      expect(result.has(7)).toBe(true);
+      const bronzeTie7 = result.get(7)!;
+      expect(bronzeTie7).toHaveLength(2);
+      expect(bronzeTie7.map(c => c.code)).toEqual(expect.arrayContaining(['FRA', 'ITA']));
+    });
+
+    it('should return empty map when no ties exist', () => {
+      const dataWithoutTies: MedalsDataWithTotal = [
+        {
+          code: 'USA',
+          gold: 9,
+          silver: 7,
+          bronze: 12,
+          total: 28
+        },
+        {
+          code: 'CHN',
+          gold: 8,
+          silver: 6,
+          bronze: 11,
+          total: 25
+        },
+        {
+          code: 'GER',
+          gold: 7,
+          silver: 5,
+          bronze: 10,
+          total: 22
+        }
+      ];
+
+      const result = getTies(dataWithoutTies, 'total');
+      expect(result.size).toBe(0);
+    });
+
+    it('should handle empty data array', () => {
+      const emptyData: MedalsDataWithTotal = [];
+      const result = getTies(emptyData, 'total');
+
+      expect(result.size).toBe(0);
+    });
+
+    it('should handle single country data', () => {
+      const singleCountryData: MedalsDataWithTotal = [
+        {
+          code: 'USA',
+          gold: 9,
+          silver: 7,
+          bronze: 12,
+          total: 28
+        }
+      ];
+
+      const result = getTies(singleCountryData, 'total');
+      expect(result.size).toBe(0);
     });
   });
 });
