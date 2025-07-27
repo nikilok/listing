@@ -1,11 +1,18 @@
+"use client";
+
 import Flag from "./Flag";
 import type { MedalsDataWithTotal } from "../types/medals";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface MedalsTableProps {
   data: MedalsDataWithTotal;
 }
 
 export default function MedalsTable({ data }: MedalsTableProps) {
+  const searchParams = useSearchParams();
+  const currentSort = searchParams.get("sort") || "gold";
+
   return (
     <div className="w-full max-w-4xl mx-auto overflow-x-auto">
       <table className="w-full min-w-full border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
@@ -14,16 +21,56 @@ export default function MedalsTable({ data }: MedalsTableProps) {
             <th className="text-left py-3 px-2 sm:py-4 sm:px-3 font-semibold text-gray-700 w-8 sm:w-16 text-xs sm:text-base"></th>
             <th className="text-left py-3 px-3 sm:py-4 sm:px-6 font-semibold text-gray-700 text-xs sm:text-base"></th>
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-yellow-600">
-              <div className="w-4 h-4 sm:w-6 sm:h-6 bg-yellow-500 rounded-full mx-auto"></div>
+              <Link
+                href="/?sort=gold"
+                className={`block hover:scale-110 transition-transform cursor-pointer ${
+                  currentSort === "gold"
+                    ? "ring-2 ring-yellow-400 ring-offset-2 rounded-full"
+                    : ""
+                }`}
+                title="Sort by Gold medals"
+              >
+                <div className="w-4 h-4 sm:w-6 sm:h-6 bg-yellow-500 rounded-full mx-auto"></div>
+              </Link>
             </th>
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-gray-500">
-              <div className="w-4 h-4 sm:w-6 sm:h-6 bg-gray-400 rounded-full mx-auto"></div>
+              <Link
+                href="/?sort=silver"
+                className={`block hover:scale-110 transition-transform cursor-pointer ${
+                  currentSort === "silver"
+                    ? "ring-2 ring-gray-400 ring-offset-2 rounded-full"
+                    : ""
+                }`}
+                title="Sort by Silver medals"
+              >
+                <div className="w-4 h-4 sm:w-6 sm:h-6 bg-gray-400 rounded-full mx-auto"></div>
+              </Link>
             </th>
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-yellow-800">
-              <div className="w-4 h-4 sm:w-6 sm:h-6 bg-yellow-800 rounded-full mx-auto"></div>
+              <Link
+                href="/?sort=bronze"
+                className={`block hover:scale-110 transition-transform cursor-pointer ${
+                  currentSort === "bronze"
+                    ? "ring-2 ring-yellow-800 ring-offset-2 rounded-full"
+                    : ""
+                }`}
+                title="Sort by Bronze medals"
+              >
+                <div className="w-4 h-4 sm:w-6 sm:h-6 bg-yellow-800 rounded-full mx-auto"></div>
+              </Link>
             </th>
             <th className="text-center py-3 px-2 sm:py-4 sm:px-6 font-semibold text-gray-700 text-xs sm:text-base">
-              TOTAL
+              <Link
+                href="/?sort=total"
+                className={`hover:text-blue-600 transition-colors cursor-pointer ${
+                  currentSort === "total"
+                    ? "text-blue-600 font-bold underline"
+                    : ""
+                }`}
+                title="Sort by Total medals"
+              >
+                TOTAL
+              </Link>
             </th>
           </tr>
         </thead>
