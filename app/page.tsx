@@ -11,13 +11,13 @@ type SearchParams = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const medalsData = medalsDataJson as MedalsData;
   const medalsDataWithTotals = await getCountryTotals(medalsData);
 
-  // Get sort parameter from URL, default to 'gold' if not provided or invalid
-  const sortParam = searchParams.sort;
+  const params = await searchParams;
+  const sortParam = params.sort;
   const validColumns: Columns[] = ['gold', 'silver', 'bronze', 'total'];
   const sortColumn: Columns = validColumns.includes(sortParam as Columns) 
     ? (sortParam as Columns) 

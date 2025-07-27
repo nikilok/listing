@@ -45,7 +45,7 @@ export function getRanksByColumn(
   data: MedalsDataWithTotal,
   column: Columns
 ): MedalsDataWithTotal {
-  let sortedData = sortByColumn(data, column);
+  const sortedData = sortByColumn(data, column);
   const ties = getTies(sortedData, column);
 
   // return early if there are no ties
