@@ -5,7 +5,13 @@ export interface MedalByCountry {
   bronze: number;
 }
 
+export interface MedalByCountryWithTotal extends MedalByCountry {
+  total: number;
+}
+
 export type MedalsData = MedalByCountry[];
+
+export type MedalsDataWithTotal = MedalByCountryWithTotal[];
 
 export type CountryCode = 
   | "USA" 
@@ -23,10 +29,3 @@ export type CountryCode =
   | "CHN";
 
 export type MedalType = "gold" | "silver" | "bronze";
-
-export interface MedalStats {
-  totalMedals: number;
-  totalGold: number;
-  totalSilver: number;
-  totalBronze: number;
-}
