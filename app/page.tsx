@@ -1,7 +1,6 @@
 import medalsDataJson from "./lib/medals.json";
 import { getCountryTotals } from "./lib/getCountryTotals";
 import type { MedalsData } from "./types/medals";
-import FlagsGrid from "./components/FlagsGrid";
 import MedalsTable from "./components/MedalsTable";
 
 export default async function Home() {
