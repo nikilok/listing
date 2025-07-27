@@ -1,11 +1,9 @@
 "use server"
 
 import type { MedalsData, MedalsDataWithTotal } from '../types/medals';
+import { getCountryTotalsPure } from './getCountryTotals.pure';
 
-// Compute Totals for the given data 
+// Server Action wrapper for the pure function
 export async function getCountryTotals(data: MedalsData): Promise<MedalsDataWithTotal> {
-  return data.map(country => ({
-    ...country,
-    total: country.gold + country.silver + country.bronze
-  }));
+  return getCountryTotalsPure(data);
 }
