@@ -30,7 +30,7 @@ export default async function Home({
         Olympics Medal Rankings
       </h1>
 
-      <MedalsTable data={top10SortedData} />
+      <MedalsTable data={top10SortedData} initialSort={sortColumn} />
     </div>
   );
 }
