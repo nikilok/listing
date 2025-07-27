@@ -1,10 +1,13 @@
 /**
  * This is only a sample component testing the flags usage
  */
-import medalsData from '../lib/medals.json';
+import medalsDataJson from '../lib/medals.json';
+import type { MedalsData } from '../types/medals';
 import Flag from './Flag';
 
 export default function FlagsGrid() {
+  const medalsData = medalsDataJson as MedalsData;
+
   return (
     <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 max-w-4xl mx-auto">
       {medalsData.map((country) => (

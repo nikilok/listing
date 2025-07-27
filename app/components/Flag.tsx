@@ -1,7 +1,8 @@
 import '../flags.css';
+import type { CountryCode } from '../types/medals';
 
 interface FlagProps {
-  countryCode: string;
+  countryCode: CountryCode;
   className?: string;
   title?: string;
 }
