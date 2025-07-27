@@ -6,9 +6,9 @@ import { getCountryTotals } from '../lib/getCountryTotals';
 import type { MedalsData } from '../types/medals';
 import Flag from './Flag';
 
-export default function FlagsGrid() {
+export default async function FlagsGrid() {
   const medalsData = medalsDataJson as MedalsData;
-  const medalsDataWithTotals = getCountryTotals(medalsData);
+  const medalsDataWithTotals = await getCountryTotals(medalsData);
 
   return (
     <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 max-w-4xl mx-auto">
