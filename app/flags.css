@@ -1,0 +1,60 @@
+.flag {
+  display: inline-block;
+  width: 28px;
+  height: 17px;
+  background-image: url('/flags.png');
+  background-repeat: no-repeat;
+  background-size: auto;
+}
+
+.AUT {
+  background-position: 0 0;
+}
+
+.BLR {
+  background-position: 0 -17px;
+}
+
+.CAN {
+  background-position: 0 -34px;
+}
+
+.CHN {
+  background-position: 0 -51px;
+}
+
+.FRA {
+  background-position: 0 -68px;
+}
+
+.GER {
+  background-position: 0 -85px;
+}
+
+.ITA {
+  background-position: 0 -102px;
+}
+
+.NED {
+  background-position: 0 -119px;
+}
+
+.NOR {
+  background-position: 0 -136px;
+}
+
+.RUS {
+  background-position: 0 -153px;
+}
+
+.SUI {
+  background-position: 0 -170px;
+}
+
+.SWE {
+  background-position: 0 -187px;
+}
+
+.USA {
+  background-position: 0 -204px;
+}
