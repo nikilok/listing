@@ -25,8 +25,8 @@ export default async function Home({
 
   const top10SortedData = getRanksByColumn(medalsDataWithTotals, sortColumn).slice(0, 10);
   return (
-    <div className="font-sans min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">
+    <div className="font-sans min-h-screen px-0 py-4 sm:p-8">
+      <h1 className="text-3xl font-bold mb-4 sm:mb-8 text-center px-4 sm:px-0">
         Olympics Medal Rankings
       </h1>
 

@@ -54,7 +54,7 @@ export default function MedalsTable({
   // Show loading state only when switching to client-side and data is loading
   if (useClientData && isLoading) {
     return (
-      <div className="w-full max-w-4xl mx-auto overflow-x-auto">
+      <div className="w-full sm:max-w-4xl sm:mx-auto overflow-x-auto">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading sorted data...</p>
@@ -66,7 +66,7 @@ export default function MedalsTable({
   // Show error state
   if (useClientData && error) {
     return (
-      <div className="w-full max-w-4xl mx-auto overflow-x-auto">
+      <div className="w-full sm:max-w-4xl sm:mx-auto overflow-x-auto">
         <div className="text-center py-8 text-red-600">
           <p>Error loading sorted data. Please try again.</p>
         </div>
@@ -75,7 +75,7 @@ export default function MedalsTable({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto overflow-x-auto">
+    <div className="w-full sm:max-w-4xl sm:mx-auto overflow-x-auto">
       <table className="w-full min-w-full border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
         <thead>
           <tr className="bg-gray-100 border-b-2 border-gray-200">
