@@ -40,6 +40,70 @@ export function getTies(
   return tiesMap;
 }
 
+// Advanced tie-breaking function that handles cascading ties
+function breakTies(
+  tiedCountries: MedalsDataWithTotal,
+  primaryColumn: Columns
+): MedalsDataWithTotal {
+  // Define tie-breaking hierarchy based on Olympic standards
+  const getTieBreakingOrder = (column: Columns): Columns[] => {
+    switch (column) {
+      case "total":
+        return ["gold", "silver", "bronze"];
+      case "gold":
+        return ["silver", "bronze"];
+      case "silver":
+        return ["gold", "bronze"];
+      case "bronze":
+        return ["gold", "silver"];
+    }
+  };
+
+  const tieBreakOrder = getTieBreakingOrder(primaryColumn);
+  
+  // Recursive function to sort with cascading tie-breaking
+  function sortWithCascadingTieBreaking(
+    countries: MedalsDataWithTotal,
+    breakingColumns: Columns[]
+  ): MedalsDataWithTotal {
+    if (countries.length <= 1 || breakingColumns.length === 0) {
+      return countries;
+    }
+
+    const [currentColumn, ...remainingColumns] = breakingColumns;
+    
+    // Sort by current tie-breaking column
+    const sorted = sortByColumn(countries, currentColumn);
+    
+    // Group by current column value to find sub-ties
+    const groups = new Map<number, MedalsDataWithTotal>();
+    sorted.forEach((country) => {
+      const value = country[currentColumn];
+      if (!groups.has(value)) {
+        groups.set(value, []);
+      }
+      groups.get(value)!.push(country);
+    });
+
+    // Recursively break ties within each group
+    const result: MedalsDataWithTotal = [];
+    for (const [value, group] of groups) {
+      if (group.length > 1) {
+        // Still tied, use next tie-breaking column
+        const subSorted = sortWithCascadingTieBreaking(group, remainingColumns);
+        result.push(...subSorted);
+      } else {
+        // No tie in this group
+        result.push(...group);
+      }
+    }
+
+    return result;
+  }
+
+  return sortWithCascadingTieBreaking(tiedCountries, tieBreakOrder);
+}
+
 // getRanksByColumn returns the results by column
 export function getRanksByColumn(
   data: MedalsDataWithTotal,
@@ -53,7 +117,7 @@ export function getRanksByColumn(
     return sortedData;
   }
 
-  // Apply tie-breaking rules
+  // Apply advanced tie-breaking rules
   const result: MedalsDataWithTotal = [];
   const processedCountries = new Set<string>();
 
@@ -69,27 +133,8 @@ export function getRanksByColumn(
     if (ties.has(primaryValue)) {
       const tiedCountries = ties.get(primaryValue)!;
 
-      // Apply tie-breaking rules based on primary column
-      let sortedTiedCountries: MedalsDataWithTotal;
-
-      switch (column) {
-        case "total":
-          // Ties broken by most gold
-          sortedTiedCountries = sortByColumn(tiedCountries, "gold");
-          break;
-        case "gold":
-          // Ties broken by most silver
-          sortedTiedCountries = sortByColumn(tiedCountries, "silver");
-          break;
-        case "silver":
-          // Ties broken by most gold
-          sortedTiedCountries = sortByColumn(tiedCountries, "gold");
-          break;
-        case "bronze":
-          // Ties broken by most gold
-          sortedTiedCountries = sortByColumn(tiedCountries, "gold");
-          break;
-      }
+      // Apply cascading tie-breaking rules
+      const sortedTiedCountries = breakTies(tiedCountries, column);
 
       result.push(...sortedTiedCountries);
 
