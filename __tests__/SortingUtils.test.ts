@@ -549,4 +549,357 @@ describe("SortingUtils", () => {
       expect(goldResult).toEqual(expected);
     });
   });
+
+  describe("getRanksByColumn - Deep Cascading Tie-Breaking Tests", () => {
+    describe("Total column with multi-level tie-breaking", () => {
+      it("should handle total tie broken by gold, then silver tie broken by bronze", () => {
+        const cascadingTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 8,
+            silver: 6,
+            bronze: 10, // Higher bronze wins silver tie
+            total: 24,
+          },
+          {
+            code: "CHN",
+            gold: 8, // Same gold as USA
+            silver: 6, // Same silver as USA -> go to bronze
+            bronze: 8, // Lower bronze loses
+            total: 24, // Same total as USA -> check gold -> check silver -> check bronze
+          },
+          {
+            code: "GER",
+            gold: 10, // Higher gold wins total tie
+            silver: 4,
+            bronze: 10,
+            total: 24, // Same total but higher gold
+          },
+          {
+            code: "FRA",
+            gold: 6, // Lower gold
+            silver: 8,
+            bronze: 10,
+            total: 24, // Same total but lower gold
+          },
+        ];
+
+        const result = getRanksByColumn(cascadingTieData, "total");
+
+        const expected = [
+          { code: "GER", gold: 10, silver: 4, bronze: 10, total: 24 }, // Wins by gold
+          { code: "USA", gold: 8, silver: 6, bronze: 10, total: 24 }, // Wins gold tie by bronze (after silver tie)
+          { code: "CHN", gold: 8, silver: 6, bronze: 8, total: 24 }, // Loses bronze tie
+          { code: "FRA", gold: 6, silver: 8, bronze: 10, total: 24 }, // Loses by gold
+        ];
+
+        expect(result).toEqual(expected);
+      });
+
+      it("should handle total tie with gold tie, then silver tie, then bronze tie", () => {
+        const deepTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 8,
+            silver: 6,
+            bronze: 10,
+            total: 24,
+          },
+          {
+            code: "CHN",
+            gold: 8, // Same gold
+            silver: 6, // Same silver
+            bronze: 10, // Same bronze - should maintain original order
+            total: 24, // Same total
+          },
+          {
+            code: "GER",
+            gold: 8, // Same gold
+            silver: 6, // Same silver
+            bronze: 12, // Higher bronze wins the deep tie
+            total: 26, // Different total (should be ranked separately)
+          },
+          {
+            code: "RUS",
+            gold: 8, // Same gold as first group
+            silver: 6, // Same silver as first group
+            bronze: 8, // Lower bronze than first group
+            total: 22, // Different total
+          },
+        ];
+
+        const result = getRanksByColumn(deepTieData, "total");
+
+        const expected = [
+          { code: "GER", gold: 8, silver: 6, bronze: 12, total: 26 }, // Highest total
+          { code: "USA", gold: 8, silver: 6, bronze: 10, total: 24 }, // 24 total, maintains order
+          { code: "CHN", gold: 8, silver: 6, bronze: 10, total: 24 }, // 24 total, maintains order
+          { code: "RUS", gold: 8, silver: 6, bronze: 8, total: 22 }, // Lowest total
+        ];
+
+        expect(result).toEqual(expected);
+      });
+
+      it("should handle complex total ties with mixed tie-breaking scenarios", () => {
+        const complexTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 10,
+            silver: 5,
+            bronze: 5,
+            total: 20,
+          },
+          {
+            code: "CHN",
+            gold: 8, // Lower gold than NOR
+            silver: 7, // Higher silver than NOR
+            bronze: 5,
+            total: 20, // Same total, will be broken by gold
+          },
+          {
+            code: "NOR",
+            gold: 9, // Higher gold than CHN, lower than USA
+            silver: 6, // Lower silver than CHN
+            bronze: 5,
+            total: 20, // Same total
+          },
+          {
+            code: "GER",
+            gold: 7,
+            silver: 8, // Higher silver than others in this gold group
+            bronze: 5,
+            total: 20,
+          },
+          {
+            code: "FRA",
+            gold: 7, // Same gold as GER
+            silver: 6, // Lower silver than GER
+            bronze: 7, // Higher bronze (should not matter due to silver difference)
+            total: 20,
+          },
+        ];
+
+        const result = getRanksByColumn(complexTieData, "total");
+
+        const expected = [
+          { code: "USA", gold: 10, silver: 5, bronze: 5, total: 20 }, // Highest gold
+          { code: "NOR", gold: 9, silver: 6, bronze: 5, total: 20 }, // Second highest gold
+          { code: "CHN", gold: 8, silver: 7, bronze: 5, total: 20 }, // Third highest gold
+          { code: "GER", gold: 7, silver: 8, bronze: 5, total: 20 }, // Same gold as FRA, higher silver
+          { code: "FRA", gold: 7, silver: 6, bronze: 7, total: 20 }, // Same gold as GER, lower silver
+        ];
+
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe("Gold column with multi-level tie-breaking", () => {
+      it("should handle gold tie broken by silver, then bronze when silver ties", () => {
+        const goldTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 10,
+            silver: 8,
+            bronze: 6, // Higher bronze wins silver tie
+            total: 24,
+          },
+          {
+            code: "CHN",
+            gold: 10, // Same gold
+            silver: 8, // Same silver -> check bronze
+            bronze: 4, // Lower bronze
+            total: 22,
+          },
+          {
+            code: "NOR",
+            gold: 10, // Same gold
+            silver: 9, // Higher silver wins
+            bronze: 2,
+            total: 21,
+          },
+          {
+            code: "GER",
+            gold: 8, // Lower gold
+            silver: 12,
+            bronze: 8,
+            total: 28,
+          },
+        ];
+
+        const result = getRanksByColumn(goldTieData, "gold");
+
+        const expected = [
+          { code: "NOR", gold: 10, silver: 9, bronze: 2, total: 21 }, // Wins by silver
+          { code: "USA", gold: 10, silver: 8, bronze: 6, total: 24 }, // Wins silver tie by bronze
+          { code: "CHN", gold: 10, silver: 8, bronze: 4, total: 22 }, // Loses bronze tie
+          { code: "GER", gold: 8, silver: 12, bronze: 8, total: 28 }, // Lower gold
+        ];
+
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe("Silver column with multi-level tie-breaking", () => {
+      it("should handle silver tie broken by gold, then bronze when gold ties", () => {
+        const silverTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 9,
+            silver: 10,
+            bronze: 8, // Higher bronze wins gold tie
+            total: 27,
+          },
+          {
+            code: "CHN",
+            gold: 9, // Same gold as USA -> check bronze
+            silver: 10, // Same silver
+            bronze: 6, // Lower bronze
+            total: 25,
+          },
+          {
+            code: "NOR",
+            gold: 11, // Higher gold wins
+            silver: 10, // Same silver
+            bronze: 4,
+            total: 25,
+          },
+          {
+            code: "GER",
+            gold: 7, // Lower gold
+            silver: 8, // Lower silver
+            bronze: 10,
+            total: 25,
+          },
+        ];
+
+        const result = getRanksByColumn(silverTieData, "silver");
+
+        const expected = [
+          { code: "NOR", gold: 11, silver: 10, bronze: 4, total: 25 }, // Wins by gold
+          { code: "USA", gold: 9, silver: 10, bronze: 8, total: 27 }, // Wins gold tie by bronze
+          { code: "CHN", gold: 9, silver: 10, bronze: 6, total: 25 }, // Loses bronze tie
+          { code: "GER", gold: 7, silver: 8, bronze: 10, total: 25 }, // Lower silver
+        ];
+
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe("Bronze column with multi-level tie-breaking", () => {
+      it("should handle bronze tie broken by gold, then silver when gold ties", () => {
+        const bronzeTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 8,
+            silver: 9, // Higher silver wins gold tie
+            bronze: 12,
+            total: 29,
+          },
+          {
+            code: "CHN",
+            gold: 8, // Same gold as USA -> check silver
+            silver: 7, // Lower silver
+            bronze: 12, // Same bronze
+            total: 27,
+          },
+          {
+            code: "NOR",
+            gold: 10, // Higher gold wins
+            silver: 5,
+            bronze: 12, // Same bronze
+            total: 27,
+          },
+          {
+            code: "GER",
+            gold: 6, // Lower gold
+            silver: 8,
+            bronze: 10, // Lower bronze
+            total: 24,
+          },
+        ];
+
+        const result = getRanksByColumn(bronzeTieData, "bronze");
+
+        const expected = [
+          { code: "NOR", gold: 10, silver: 5, bronze: 12, total: 27 }, // Wins by gold
+          { code: "USA", gold: 8, silver: 9, bronze: 12, total: 29 }, // Wins gold tie by silver
+          { code: "CHN", gold: 8, silver: 7, bronze: 12, total: 27 }, // Loses silver tie
+          { code: "GER", gold: 6, silver: 8, bronze: 10, total: 24 }, // Lower bronze
+        ];
+
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe("Edge cases for cascading tie-breaking", () => {
+      it("should handle scenario where all tie-breaking columns are identical", () => {
+        const identicalTieData: MedalsDataWithTotal = [
+          {
+            code: "USA",
+            gold: 8,
+            silver: 6,
+            bronze: 10,
+            total: 24,
+          },
+          {
+            code: "CHN",
+            gold: 8, // Same gold
+            silver: 6, // Same silver
+            bronze: 10, // Same bronze
+            total: 24, // Same total
+          },
+          {
+            code: "NOR",
+            gold: 10, // Different, should rank first
+            silver: 4,
+            bronze: 10,
+            total: 24,
+          },
+        ];
+
+        const result = getRanksByColumn(identicalTieData, "total");
+
+        const expected = [
+          { code: "NOR", gold: 10, silver: 4, bronze: 10, total: 24 }, // Higher gold
+          { code: "USA", gold: 8, silver: 6, bronze: 10, total: 24 }, // Maintains original order
+          { code: "CHN", gold: 8, silver: 6, bronze: 10, total: 24 }, // Maintains original order
+        ];
+
+        expect(result).toEqual(expected);
+      });
+
+      it("should handle large dataset with multiple tie groups", () => {
+        const largeTieData: MedalsDataWithTotal = [
+          // Group 1: Total 30, Gold 12
+          { code: "USA", gold: 12, silver: 8, bronze: 10, total: 30 },
+          { code: "CHN", gold: 12, silver: 6, bronze: 12, total: 30 },
+          
+          // Group 2: Total 30, Gold 10
+          { code: "NOR", gold: 10, silver: 10, bronze: 10, total: 30 },
+          { code: "GER", gold: 10, silver: 9, bronze: 11, total: 30 },
+          
+          // Group 3: Total 25
+          { code: "RUS", gold: 11, silver: 7, bronze: 7, total: 25 },
+          { code: "FRA", gold: 9, silver: 8, bronze: 8, total: 25 },
+          
+          // Single: Total 28
+          { code: "ITA", gold: 13, silver: 7, bronze: 8, total: 28 },
+        ];
+
+        const result = getRanksByColumn(largeTieData, "total");
+
+        const expected = [
+          { code: "USA", gold: 12, silver: 8, bronze: 10, total: 30 }, // 30 total, 12 gold, 8 silver
+          { code: "CHN", gold: 12, silver: 6, bronze: 12, total: 30 }, // 30 total, 12 gold, 6 silver
+          { code: "NOR", gold: 10, silver: 10, bronze: 10, total: 30 }, // 30 total, 10 gold, 10 silver
+          { code: "GER", gold: 10, silver: 9, bronze: 11, total: 30 }, // 30 total, 10 gold, 9 silver
+          { code: "ITA", gold: 13, silver: 7, bronze: 8, total: 28 }, // 28 total
+          { code: "RUS", gold: 11, silver: 7, bronze: 7, total: 25 }, // 25 total, 11 gold
+          { code: "FRA", gold: 9, silver: 8, bronze: 8, total: 25 }, // 25 total, 9 gold
+        ];
+
+        expect(result).toEqual(expected);
+      });
+    });
+  });
 });
