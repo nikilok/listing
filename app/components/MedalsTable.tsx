@@ -2,7 +2,7 @@
 
 import Flag from "./Flag";
 import type { MedalsDataWithTotal } from "../types/medals";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSortData } from "../hooks/useSortData";
 import { useEffect, useState } from "react";
 import type { Columns } from "../lib/SortingUtils";
@@ -17,14 +17,13 @@ export default function MedalsTable({
   initialSort,
 }: MedalsTableProps) {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // Local state for current sort to avoid server round-trips
   const [currentSort, setCurrentSort] = useState<Columns>(
     (searchParams.get("sort") as Columns) || initialSort
   );
 
-  const { data: clientData, isLoading, error } = useSortData();
+  const { data: clientData, error } = useSortData();
 
   // State to track if we should use client data
   const [useClientData, setUseClientData] = useState(false);
@@ -40,8 +39,8 @@ export default function MedalsTable({
       setUseClientData(true);
       setDisplayData(clientData[column]);
     } else {
-      // Fallback to server request if no client data
-      router.push(`/?sort=${column}`);
+      // Fallback to server request if no client data - force full page reload
+      window.location.href = `/?sort=${column}`;
     }
   }; 
 
@@ -50,18 +49,6 @@ export default function MedalsTable({
       setDisplayData(clientData[currentSort]);
     }
   }, [clientData, useClientData, currentSort]);
-
-  // Show loading state only when switching to client-side and data is loading
-  if (useClientData && isLoading) {
-    return (
-      <div className="w-full sm:max-w-4xl sm:mx-auto overflow-x-auto">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading sorted data...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show error state
   if (useClientData && error) {

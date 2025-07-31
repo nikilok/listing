@@ -87,7 +87,7 @@ function breakTies(
 
     // Recursively break ties within each group
     const result: MedalsDataWithTotal = [];
-    for (const [value, group] of groups) {
+    for (const [, group] of groups) {
       if (group.length > 1) {
         // Still tied, use next tie-breaking column
         const subSorted = sortWithCascadingTieBreaking(group, remainingColumns);
