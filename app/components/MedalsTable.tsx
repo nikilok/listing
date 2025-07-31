@@ -1,54 +1,54 @@
-"use client";
+'use client'
 
-import Flag from "./Flag";
-import type { MedalsDataWithTotal } from "../types/medals";
-import { useSearchParams } from "next/navigation";
-import { useSortData } from "../hooks/useSortData";
-import { useEffect, useState } from "react";
-import type { Columns } from "../lib/SortingUtils";
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useSortData } from '../hooks/useSortData'
+import type { Columns } from '../lib/SortingUtils'
+import type { MedalsDataWithTotal } from '../types/medals'
+import Flag from './Flag'
 
 interface MedalsTableProps {
-  data: MedalsDataWithTotal;
-  initialSort: Columns;
+  data: MedalsDataWithTotal
+  initialSort: Columns
 }
 
 export default function MedalsTable({
   data: serverData,
   initialSort,
 }: MedalsTableProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()
 
   // Local state for current sort to avoid server round-trips
   const [currentSort, setCurrentSort] = useState<Columns>(
-    (searchParams.get("sort") as Columns) || initialSort
-  );
+    (searchParams.get('sort') as Columns) || initialSort
+  )
 
-  const { data: clientData, error } = useSortData();
+  const { data: clientData, error } = useSortData()
 
   // State to track if we should use client data
-  const [useClientData, setUseClientData] = useState(false);
-  const [displayData, setDisplayData] = useState(serverData);
+  const [useClientData, setUseClientData] = useState(false)
+  const [displayData, setDisplayData] = useState(serverData)
 
   const handleSortClick = (column: Columns) => {
     if (clientData) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sort", column);
-      window.history.replaceState({}, "", url.toString());
+      const url = new URL(window.location.href)
+      url.searchParams.set('sort', column)
+      window.history.replaceState({}, '', url.toString())
 
-      setCurrentSort(column);
-      setUseClientData(true);
-      setDisplayData(clientData[column]);
+      setCurrentSort(column)
+      setUseClientData(true)
+      setDisplayData(clientData[column])
     } else {
       // Fallback to server request if no client data - force full page reload
-      window.location.href = `/?sort=${column}`;
+      window.location.href = `/?sort=${column}`
     }
-  }; 
+  }
 
   useEffect(() => {
     if (clientData && useClientData) {
-      setDisplayData(clientData[currentSort]);
+      setDisplayData(clientData[currentSort])
     }
-  }, [clientData, useClientData, currentSort]);
+  }, [clientData, useClientData, currentSort])
 
   // Show error state
   if (useClientData && error) {
@@ -58,7 +58,7 @@ export default function MedalsTable({
           <p>Error loading sorted data. Please try again.</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -71,11 +71,12 @@ export default function MedalsTable({
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-yellow-600">
               <div className="flex justify-center">
                 <button
-                  onClick={() => handleSortClick("gold")}
+                  type="button"
+                  onClick={() => handleSortClick('gold')}
                   className={`hover:scale-110 transition-transform cursor-pointer p-1 ${
-                    currentSort === "gold"
-                      ? "ring-2 ring-yellow-400 rounded-full"
-                      : ""
+                    currentSort === 'gold'
+                      ? 'ring-2 ring-yellow-400 rounded-full'
+                      : ''
                   }`}
                   title="Sort by Gold medals"
                 >
@@ -86,11 +87,12 @@ export default function MedalsTable({
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-gray-500">
               <div className="flex justify-center">
                 <button
-                  onClick={() => handleSortClick("silver")}
+                  type="button"
+                  onClick={() => handleSortClick('silver')}
                   className={`hover:scale-110 transition-transform cursor-pointer p-1 ${
-                    currentSort === "silver"
-                      ? "ring-2 ring-gray-400 rounded-full"
-                      : ""
+                    currentSort === 'silver'
+                      ? 'ring-2 ring-gray-400 rounded-full'
+                      : ''
                   }`}
                   title="Sort by Silver medals"
                 >
@@ -101,11 +103,12 @@ export default function MedalsTable({
             <th className="text-center py-3 px-1 sm:py-4 sm:px-4 font-semibold text-yellow-800">
               <div className="flex justify-center">
                 <button
-                  onClick={() => handleSortClick("bronze")}
+                  type="button"
+                  onClick={() => handleSortClick('bronze')}
                   className={`hover:scale-110 transition-transform cursor-pointer p-1 ${
-                    currentSort === "bronze"
-                      ? "ring-2 ring-yellow-800 rounded-full"
-                      : ""
+                    currentSort === 'bronze'
+                      ? 'ring-2 ring-yellow-800 rounded-full'
+                      : ''
                   }`}
                   title="Sort by Bronze medals"
                 >
@@ -115,11 +118,12 @@ export default function MedalsTable({
             </th>
             <th className="text-center py-3 px-2 sm:py-4 sm:px-6 font-semibold text-gray-700 text-xs sm:text-base">
               <button
-                onClick={() => handleSortClick("total")}
+                type="button"
+                onClick={() => handleSortClick('total')}
                 className={`hover:text-blue-600 transition-colors cursor-pointer px-2 py-1 rounded ${
-                  currentSort === "total"
-                    ? "text-blue-600 font-bold bg-blue-100"
-                    : ""
+                  currentSort === 'total'
+                    ? 'text-blue-600 font-bold bg-blue-100'
+                    : ''
                 }`}
                 title="Sort by Total medals"
               >
@@ -162,5 +166,5 @@ export default function MedalsTable({
         </tbody>
       </table>
     </div>
-  );
+  )
 }
